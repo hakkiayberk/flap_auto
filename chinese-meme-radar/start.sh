@@ -2,6 +2,8 @@
 set -e
 cd "$(dirname "$0")"
 
+RADAR_BACKEND_PORT="${RADAR_BACKEND_PORT:-8000}"
+RADAR_FRONTEND_PORT="${RADAR_FRONTEND_PORT:-15000}"
 echo "Starting China Meme Radar..."
 
 # Setup Python environment
@@ -17,7 +19,7 @@ pip install -r backend/requirements.txt
 # Start backend in the background
 echo "Starting FastAPI backend on port 8000..."
 cd backend
-uvicorn main:app --host 127.0.0.1 --port 8000 &
+uvicorn main:app --host 127.0.0.1 --port "$RADAR_BACKEND_PORT" &
 BACKEND_PID=$!
 trap 'kill "$BACKEND_PID" 2>/dev/null || true' EXIT INT TERM
 cd ..
@@ -32,5 +34,5 @@ if [ ! -d "node_modules" ]; then
     echo "Installing Node.js dependencies..."
     npm install
 fi
-npm run dev
+RADAR_API_URL="http://127.0.0.1:$RADAR_BACKEND_PORT" npm run dev -- --host 127.0.0.1 --port "$RADAR_FRONTEND_PORT"
 

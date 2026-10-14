@@ -17,8 +17,8 @@ def readiness():
     checks.append({"name": "X integration", "ready": False,
                    "detail": "Account verification and write access still need to be connected and tested."})
     deploy_found = (FLAP_ROOT / "src" / "flap-deploy.ts").exists()
-    checks.append({"name": "Flap deploy adapter", "ready": deploy_found,
-                   "detail": "Adapter exists; chain verification is still required." if deploy_found else "Deploy adapter is missing."})
+    checks.append({"name": "Flap preparation", "ready": deploy_found,
+                   "detail": "Unsigned Flap preparation is available. Use Launch Studio to check RPC and prepare; live signing is disabled." if deploy_found else "Deploy adapter is missing."})
     count = 0
     try:
         wallets = json.loads((FLAP_ROOT / "watch-wallets.json").read_text())

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import './App.css'
+import LaunchStudio, { type LaunchSelection } from './LaunchStudio'
 
 interface Trend {
   id: number
@@ -70,6 +71,8 @@ function ScoreBar({ score, max = 10000 }: { score: number; max?: number }) {
 }
 
 export default function App() {
+  const [selection, setSelection] = useState<LaunchSelection | null>(null)
+  const [studioOpen, setStudioOpen] = useState(true)
   const [status, setStatus] = useState<string>('Loading...')
   const [trends, setTrends] = useState<Trend[]>([])
   const [stats, setStats] = useState<Stats | null>(null)
@@ -79,6 +82,11 @@ export default function App() {
   const [examples, setExamples] = useState<ReferenceExample[]>([])
   const [connections, setConnections] = useState<{ checks: { name: string; ready: boolean; detail: string }[]; x_discovery?: { status: string; watch_accounts: string[]; detail: string } } | null>(null)
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
+
+  const selectForLaunch = (item: LaunchSelection) => {
+    setSelection(item); setStudioOpen(true)
+    requestAnimationFrame(() => document.getElementById('launch-studio')?.scrollIntoView({behavior:'smooth',block:'start'}))
+  }
 
   const fetchStats = useCallback(async () => {
     try {
@@ -153,10 +161,10 @@ export default function App() {
             { icon: '🧭', label: 'Trend Explorer',  active: false },
             { icon: '🐼', label: 'Animal Radar',    active: false },
             { icon: '🇨🇳', label: 'Chinese Meme',   active: false },
-            { icon: '🔬', label: 'AI Token Lab',    active: false },
+            { icon: '🔬', label: 'Launch Studio',   active: false },
             { icon: '⚙️', label: 'Settings',         active: false },
           ].map(item => (
-            <a key={item.label} href="#" className={`nav-item${item.active ? ' active' : ''}`}>
+            <a key={item.label} href={item.label === 'Launch Studio' ? '#launch-studio' : '#'} onClick={item.label === 'Launch Studio' ? () => setStudioOpen(true) : undefined} className={`nav-item${item.active ? ' active' : ''}`}>
               <span className="nav-icon">{item.icon}</span>
               {item.label}
             </a>
@@ -219,6 +227,7 @@ export default function App() {
             </div>
             <p>{connections?.x_discovery?.detail ?? 'Checking source connection…'}</p>
           </section>
+          {studioOpen && <LaunchStudio selection={selection}/>}
           {/* Stats Row */}
           <div className="stats-grid">
             {statCards.map(card => (
@@ -248,6 +257,7 @@ export default function App() {
                       <a href={e.source_post_url} target="_blank" rel="noopener noreferrer">Source post ↗</a>
                       <a href={e.token_url} target="_blank" rel="noopener noreferrer">Reference token ↗</a>
                     </div>
+                    <button className="launch-select" onClick={()=>selectForLaunch({title:e.source_entity,url:e.source_post_url,name:e.chinese_candidate_name})}>Use for Launch</button>
                     <small>Reference quote: {e.observed_quote_asset} · Candidate name: <span lang="zh">{e.chinese_candidate_name ?? 'Pending naming review'}</span></small>
                   </article>
                 ))}
@@ -271,13 +281,7 @@ export default function App() {
             ) : (
               <div className="trend-list">
                 {trends.map(t => (
-                  <a
-                    key={t.id}
-                    href={t.original_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="trend-card"
-                  >
+                  <article key={t.id} className="trend-card">
                     {t.thumbnail_url && (
                       <img
                         src={t.thumbnail_url}
@@ -295,10 +299,11 @@ export default function App() {
                           <span className="category-tag">{t.category}</span>
                         )}
                       </div>
-                      <div className="trend-title" lang="zh">{t.title}</div>
+                      <a className="trend-title" href={t.original_url} target="_blank" rel="noopener noreferrer">{t.title}</a>
                       <p className="trend-context">{t.suggestion?.name ? <>Name candidate: <span lang="zh">{t.suggestion.name}</span> · Review required</> : t.suggestion?.source_alias ? <>Source hook: {t.suggestion.source_alias} · Chinese name review required</> : 'No reviewed name candidate'}</p>
                       <p className="trend-context">{t.suggestion?.reason ?? t.context?.summary}</p>
                       <small className="trend-context-note">{t.context?.score_note}</small>
+                      <button className="launch-select" onClick={()=>selectForLaunch({title:t.title,url:t.original_url,name:t.suggestion?.name ?? null})}>Use for Launch</button>
                       <div className="trend-footer">
                         <div className="trend-stats">
                           {t.likes > 0 && <span>❤️ {t.likes.toLocaleString()}</span>}
@@ -311,7 +316,7 @@ export default function App() {
                         </div>
                       </div>
                     </div>
-                  </a>
+                  </article>
                 ))}
               </div>
             )}

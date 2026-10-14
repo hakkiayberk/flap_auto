@@ -9,7 +9,7 @@ Chinese trend discovery with an English dashboard, an X publishing adapter, and 
 - Context is explicitly marked unverified. Translation, meme explanation, real growth tracking and automated candidate selection are not implemented yet.
 - The X adapter validates weighted character length, verifies the configured account and records a post intent before sending. An uncertain outcome blocks retries; a confirmed result is reusable after restart.
 - The existing buy engine supports selected wallets, limits, simulation and durable transaction tracking. A second buy of the same token is rejected.
-- Live deploy is disabled. The required `src/flap-deploy.ts` adapter is not implemented yet. No unattended launch worker is running.
+- Live deploy is disabled. `src/flap-deploy.ts` supports read-only connection checks, weighted post previews and unsigned launch preparation. It never signs or broadcasts. No unattended launch worker is running.
 
 ## Planned sequence
 
@@ -47,7 +47,7 @@ cd chinese-meme-radar
 ./start.sh
 ```
 
-The dashboard runs on port 5000 (Vite may select another free port); the API listens on `127.0.0.1:8000`.
+The launcher defaults to dashboard port 15000 (Vite may select another free port); the API listens on `127.0.0.1:8000`.
 
 Offline backend checks (from `chinese-meme-radar/backend`):
 
@@ -89,3 +89,15 @@ The X status panel distinguishes missing credentials, successful polls, partial/
 The fourth reference is Binance's community term `binancians`, demonstrating that useful hooks can be community names and distinctive phrases as well as animals. The observed token retains that English term and uses BNCB in its pool. The Chinese adaptation remains unset for naming review, and the first release still uses BNB pools. Live read access, general content interpretation and a continuous stream have not been verified.
 
 Official API references: [user lookup](https://docs.x.com/x-api/users/get-user-by-username) and [user posts](https://docs.x.com/x-api/users/get-posts).
+
+## Launch Studio
+
+The local dashboard now includes a visible Launch Studio. Select `Use for Launch` on a trend or reference to populate the subject and reviewed Chinese name, then review the post, artwork and tax settings. The studio links to the real Flap launch page and checks BSC chain 56, Portal bytecode and tax-token implementation bytecode through the configured RPC without unlocking wallets.
+
+The first reviewed artwork is an AI-generated Black Shiba concept in `frontend/public/concepts/black-shiba-concept.png`. It is a draft, not an existing token's logo. Other subjects receive their own image-generation brief; generate the selected artwork in Codex or upload a PNG up to 3 MB. Website-triggered image generation is not connected. Changing the concept's subject clears the sample logo.
+
+The studio can validate the first post using X's weighted rules and open the X composer for manual account review. It accepts the resulting published-post URL. User-context API publishing is still not connected. Pinning is an explicit action that sends the selected image, description, creator address and post URL to Flap's documented upload API. A local receipt records the returned CID. An IPFS read verifies the exact `twitter` field and image before unsigned preparation; propagation failures can be rechecked without re-uploading. A URL supplied by the user is not proof of tweet ownership.
+
+`/api/deploy/prepare` produces unsigned `Portal.newTokenV6` calldata for native BNB, tax V3, recipient or BNB-dividend allocation, and a bounded search for a predicted address ending in 7777. The predicted address is based on the documented implementation and is explicitly marked unverified on chain. Transaction fees, actual tax routing, deployment return address and creator balance still require simulation. This route does not sign, broadcast or run 10-wallet buys. `/api/deploy` always rejects live requests.
+
+Neither tax allocation, durations, recipient nor buy budget are silently chosen for the user. Live operation still requires a verified simulation/signing flow, X access, all 10 wallets and spending configuration. `Download Launch Plan` exports the reviewable draft or unsigned transaction locally.
