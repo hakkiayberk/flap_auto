@@ -23,7 +23,7 @@ def get_db():
 @router.get("")
 def list_trends(
     db: Session = Depends(get_db),
-    platform: Optional[str] = Query(None, description="Filter by platform: weibo | bilibili"),
+    platform: Optional[str] = Query(None, description="Filter by platform: weibo | bilibili | x"),
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
 ):
@@ -61,7 +61,8 @@ async def manual_refresh(db: Session = Depends(get_db)):
     """Manually trigger an ingest cycle."""
     from services.ingest import ingest_all
     count = await ingest_all(db)
-    return {"inserted": count}
+    from collectors.x import discovery_status
+    return {"inserted": count, "x_discovery": discovery_status()}
 
 
 def _trend_to_dict(t: Trend) -> dict:
@@ -71,6 +72,7 @@ def _trend_to_dict(t: Trend) -> dict:
         "suggestion": suggest_token(t.title),
         "original_url": t.original_url,
         "source_platform": t.source_platform,
+        "source_account": t.category if t.source_platform == "x" else None,
         "published_at": t.published_at.isoformat() if t.published_at else None,
         "first_detected_at": t.first_detected_at.isoformat() if t.first_detected_at else None,
         "category": t.category,

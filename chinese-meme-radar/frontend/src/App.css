@@ -19,3 +19,11 @@
 .reference-links { display: flex; flex-wrap: wrap; gap: 12px; margin: 15px 0; }
 .reference-links a { color: #a5b4fc; font-size: 12px; }
 @media (max-width: 1050px) { .reference-grid { grid-template-columns: 1fr; } }
+
+.x-watch-panel { background: #202736; border: 1px solid #334155; border-radius: 14px; padding: 20px; margin-bottom: 24px; }
+.x-watch-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.x-watch-header h3 { margin: 0; }
+.x-watch-header span { font-size: 12px; color: #fbbf24; }
+.x-watch-handles { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0 12px; }
+.x-watch-handles a { padding: 7px 10px; background: #29324a; color: #a5b4fc; border-radius: 8px; font-size: 13px; }
+.x-watch-panel p { color: #94a3b8; font-size: 12px; line-height: 1.6; }

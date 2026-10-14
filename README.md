@@ -72,8 +72,20 @@ Use `git pull --ff-only` before work and push reviewed source changes. GitHub ho
 
 ## Reviewed naming references
 
-The three supplied post/token pairs are stored in `chinese-meme-radar/backend/reference/examples.json` and displayed through `/api/examples`. They demonstrate a cultural entity (泡菜 / 김치), a named panda (萌兰), and a character extracted from a brand post (Black Shiba / 黑柴). These are observations, not verified causal links or profitability evidence. The first reference uses an older source post. Exact post-to-deployment latency is not established.
+The reviewed supplied post/token pairs are stored in `chinese-meme-radar/backend/reference/examples.json` and displayed through `/api/examples`. They demonstrate a cultural entity (泡菜 / 김치), a named panda (萌兰), and a character extracted from a brand post (Black Shiba / 黑柴). These are observations, not verified causal links or profitability evidence. The first reference uses an older source post. Exact post-to-deployment latency is not established.
 
 Chinese candidates preserve specific entities. English controls and explanations remain separate. Unknown subjects receive no invented fallback name; broad keyword matches require review, and ambiguous titles have no single candidate. The reviewed alias registry is small; generalized entity extraction and live X ingestion remain outstanding.
 
 The reference pools display EWYB, FXIon and BABAB. The user selected native BNB for the first release; do not automatically copy reference pool assets. The first-post URL must be saved and verified in metadata, and brand source posts must never be represented as company endorsement of a token.
+
+## X discovery watchlist
+
+The collector now reads the configured accounts `cz_binance`, `heyibinance`, `binance`, and `binancezh` through X user lookup and user-post timelines. Configure `chinese-meme-radar/backend/.env` using its `.env.example`. `X_READ_BEARER_TOKEN` is separate from the Node publisher's user token. Read access does not authorize or enable publishing. The collector makes no calls when read credentials are absent.
+
+Each refresh reads at most 20 posts per page and two pages per account by default. It refreshes metrics for matching URLs without inserting duplicates. It retains original text, account, UTC publish time, media previews, likes, replies and shares. Own replies are included by default; reposts are excluded. Quote posts are retained as authored posts, but quoted source content is not automatically treated as authored by the watched account. The feed score is `likes + 2 * shares + 0.5 * replies`, a snapshot heuristic rather than proven virality or growth.
+
+The X status panel distinguishes missing credentials, successful polls, partial/bounded coverage, access failures and rate limits. A bounded recent snapshot is not a complete event stream. Shared authentication or rate-limit failures stop further account requests for that cycle and apply a cooldown. API bodies and credentials are never returned in status or logged. Network requests are read-only.
+
+The fourth reference is Binance's community term `binancians`, demonstrating that useful hooks can be community names and distinctive phrases as well as animals. The observed token retains that English term and uses BNCB in its pool. The Chinese adaptation remains unset for naming review, and the first release still uses BNB pools. Live read access, general content interpretation and a continuous stream have not been verified.
+
+Official API references: [user lookup](https://docs.x.com/x-api/users/get-user-by-username) and [user posts](https://docs.x.com/x-api/users/get-posts).

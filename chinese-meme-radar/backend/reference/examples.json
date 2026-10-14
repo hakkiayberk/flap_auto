@@ -49,5 +49,22 @@
     "observed_token_created_label": "10/14/2026 06:51:24",
     "timing_note": "The post and token labels show the same date. Exact time delay needs timezone and chain verification.",
     "verification": "Post and token-page content observed in browser; chain metadata and causality not independently verified."
+  },
+  {
+    "id": "binancians",
+    "source_post_url": "https://x.com/binance/status/2109947862998007825",
+    "token_url": "https://gmgn.ai/bsc/token/0x8dceff98285b93013ab708d65e0206880c167777",
+    "token_address": "0x8dceff98285b93013ab708d65e0206880c167777",
+    "source_entity": "binancians",
+    "observed_token_label": "binancians",
+    "chinese_candidate_name": null,
+    "pattern": "Community term",
+    "explanation": "Binance highlights its community using the distinct word binancians. The reference token preserves that word. This demonstrates a community-name hook rather than an animal or mascot.",
+    "naming_rule": "Extract the distinctive term, not the brand name. Keep the original spelling; a Chinese adaptation requires naming review.",
+    "observed_quote_asset": "BNCB",
+    "source_post_date": "2026-10-13",
+    "observed_token_created_label": "10/13/2026 13:02:33",
+    "timing_note": "The post and token labels show the same date. Exact latency and timezone alignment are not independently verified.",
+    "verification": "Post and token social link observed in browser; no company endorsement or causal relationship established."
   }
 ]

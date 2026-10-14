@@ -3,6 +3,7 @@ import os
 import json
 from pathlib import Path
 from fastapi import APIRouter
+from collectors.x import discovery_status
 
 router = APIRouter(prefix="/api/launch", tags=["launch"])
 FLAP_ROOT = Path(__file__).resolve().parents[3]
@@ -10,6 +11,9 @@ FLAP_ROOT = Path(__file__).resolve().parents[3]
 
 def readiness():
     checks = []
+    discovery = discovery_status()
+    checks.append({"name": "X discovery", "ready": discovery["status"] == "ok",
+                   "detail": discovery["detail"]})
     checks.append({"name": "X integration", "ready": False,
                    "detail": "Account verification and write access still need to be connected and tested."})
     deploy_found = (FLAP_ROOT / "src" / "flap-deploy.ts").exists()
@@ -30,7 +34,7 @@ def readiness():
                    "detail": "Buy 2% / sell 2%. Dividend or recipient allocation, durations and budget are still pending."})
     checks.append({"name": "Execution", "ready": False,
                    "detail": "Live launch is disabled. No automatic post, deploy or buy is running."})
-    return {"mode": "preparation", "live_ready": False, "checks": checks}
+    return {"mode": "preparation", "live_ready": False, "checks": checks, "x_discovery": discovery}
 
 
 @router.get("/status")

@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from collectors.weibo import fetch_weibo_trends
 from collectors.bilibili import fetch_bilibili_trends
+from collectors.x import fetch_x_trends
 from collectors.weibo_animals import _contains_animal
 from database.models import Trend
 
@@ -22,6 +23,7 @@ async def ingest_all(db: Session) -> int:
     all_trends: list[dict] = []
     all_trends.extend(await fetch_weibo_trends())
     all_trends.extend(await fetch_bilibili_trends())
+    all_trends.extend(await fetch_x_trends())
 
     inserted = 0
     for item in all_trends:

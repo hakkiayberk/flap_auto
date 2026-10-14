@@ -8,6 +8,7 @@ interface Trend {
   source_platform: 'weibo' | 'bilibili' | string
   published_at: string | null
   first_detected_at: string | null
+  source_account?: string | null
   category: string
   likes: number
   comments: number
@@ -17,14 +18,14 @@ interface Trend {
   growth_indicator: number
   is_analyzed: boolean
   context: { summary: string; analysis_status: string; score_note: string }
-  suggestion?: { name: string | null; reason: string; confidence: string }
+  suggestion?: { name: string | null; source_alias?: string; reason: string; confidence: string }
 }
 
 interface ReferenceExample {
   id: string
   source_entity: string
   observed_token_label: string
-  chinese_candidate_name: string
+  chinese_candidate_name: string | null
   pattern: string
   explanation: string
   naming_rule: string
@@ -42,6 +43,7 @@ interface Stats {
 }
 
 const PLATFORM_META: Record<string, { emoji: string; label: string; color: string }> = {
+  x:        { emoji: '𝕏', label: 'X', color: '#cbd5e1' },
   weibo:    { emoji: '🇨🇳', label: 'Weibo',    color: '#e6162d' },
   bilibili: { emoji: '📺', label: 'Bilibili', color: '#00a1d6' },
 }
@@ -75,7 +77,7 @@ export default function App() {
   const [loading, setLoading] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
   const [examples, setExamples] = useState<ReferenceExample[]>([])
-  const [connections, setConnections] = useState<{ checks: { name: string; ready: boolean; detail: string }[] } | null>(null)
+  const [connections, setConnections] = useState<{ checks: { name: string; ready: boolean; detail: string }[]; x_discovery?: { status: string; watch_accounts: string[]; detail: string } } | null>(null)
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
 
   const fetchStats = useCallback(async () => {
@@ -122,6 +124,7 @@ export default function App() {
   useEffect(() => {
     void Promise.resolve().then(() => { fetchStats(); fetchTrends() })
     const interval = setInterval(() => {
+      fetch('/api/launch/status').then(r => r.ok ? r.json() : null).then(setConnections).catch(() => {})
       fetchStats()
       fetchTrends()
     }, 60_000)
@@ -178,7 +181,7 @@ export default function App() {
           <div className="topbar-left">
             <h2 className="topbar-title">Overview</h2>
             <div className="platform-tabs">
-              {['', 'weibo', 'bilibili'].map(p => (
+              {['', 'weibo', 'bilibili', 'x'].map(p => (
                 <button
                   key={p}
                   className={`tab-btn${platform === p ? ' selected' : ''}`}
@@ -206,6 +209,15 @@ export default function App() {
             {connections ? connections.checks.map(c => (
               <div key={c.name}><strong>{c.ready ? '✓' : '○'} {c.name}</strong><span> — {c.detail}</span></div>
             )) : <p>Connection status unavailable.</p>}
+          </section>
+          <section className="x-watch-panel">
+            <div className="x-watch-header"><h3>X Watchlist</h3><span>{connections?.x_discovery?.status === 'ok' ? 'Last poll succeeded' : connections?.x_discovery?.status === 'missing_credentials' ? 'Not connected' : 'Awaiting verified poll'}</span></div>
+            <div className="x-watch-handles">
+              {(connections?.x_discovery?.watch_accounts ?? []).map(handle => (
+                <a key={handle} href={`https://x.com/${handle}`} target="_blank" rel="noopener noreferrer">@{handle} ↗</a>
+              ))}
+            </div>
+            <p>{connections?.x_discovery?.detail ?? 'Checking source connection…'}</p>
           </section>
           {/* Stats Row */}
           <div className="stats-grid">
@@ -236,7 +248,7 @@ export default function App() {
                       <a href={e.source_post_url} target="_blank" rel="noopener noreferrer">Source post ↗</a>
                       <a href={e.token_url} target="_blank" rel="noopener noreferrer">Reference token ↗</a>
                     </div>
-                    <small>Reference quote: {e.observed_quote_asset} · Candidate name: <span lang="zh">{e.chinese_candidate_name}</span></small>
+                    <small>Reference quote: {e.observed_quote_asset} · Candidate name: <span lang="zh">{e.chinese_candidate_name ?? 'Pending naming review'}</span></small>
                   </article>
                 ))}
               </div>
@@ -278,12 +290,13 @@ export default function App() {
                     <div className="trend-body">
                       <div className="trend-meta">
                         {platformBadge(t.source_platform)}
-                        {t.category && (
+                        {t.source_account && <span className="category-tag">@{t.source_account}</span>}
+                        {t.category && t.source_platform !== 'x' && (
                           <span className="category-tag">{t.category}</span>
                         )}
                       </div>
                       <div className="trend-title" lang="zh">{t.title}</div>
-                      <p className="trend-context">{t.suggestion?.name ? <>Name candidate: <span lang="zh">{t.suggestion.name}</span> · Review required</> : 'No reviewed name candidate'}</p>
+                      <p className="trend-context">{t.suggestion?.name ? <>Name candidate: <span lang="zh">{t.suggestion.name}</span> · Review required</> : t.suggestion?.source_alias ? <>Source hook: {t.suggestion.source_alias} · Chinese name review required</> : 'No reviewed name candidate'}</p>
                       <p className="trend-context">{t.suggestion?.reason ?? t.context?.summary}</p>
                       <small className="trend-context-note">{t.context?.score_note}</small>
                       <div className="trend-footer">

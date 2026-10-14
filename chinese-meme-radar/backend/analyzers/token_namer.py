@@ -3,6 +3,8 @@ import re
 
 # Small reviewed alias registry, not an open-ended entity recognizer.
 ENTITIES = (
+    {"name": None, "aliases": ("binancians",), "pattern": "Community term", "emoji": "👥",
+     "reason": "Distinct community term: binancians. Preserve the source spelling; choose a Chinese adaptation in naming review. This is not company endorsement."},
     {"name": "萌兰", "aliases": ("萌兰",), "pattern": "Named animal", "emoji": "🐼",
      "reason": "Preserve the specific panda name rather than replacing it with a generic panda label."},
     {"name": "黑柴", "aliases": ("黑柴", "Black Shiba"), "pattern": "Brand-post character", "emoji": "🐕",
@@ -35,7 +37,7 @@ def suggest_token(title: str) -> dict:
     if len(matches) > 1:
         return {**base, "name": None, "ticker": None, "confidence": "none", "pattern": "Ambiguous entities",
                 "reason": "Multiple reviewed entities occur in this title. Select the intended subject before naming.",
-                "candidates": [entity["name"] for entity, _ in matches], "logo_emoji": "🔎"}
+                "candidates": [entity["name"] or alias for entity, alias in matches], "logo_emoji": "🔎"}
     if matches:
         entity, alias = matches[0]
         return {**base, "name": entity["name"], "ticker": entity["name"], "source_alias": alias,

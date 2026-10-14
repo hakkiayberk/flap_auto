@@ -27,7 +27,14 @@ class NamingTest(unittest.TestCase):
         self.assertTrue(result['review_required'])
 
     def test_reference_pairs_preserve_non_bnb_quotes_without_enabling_trades(self):
-        examples = list_examples()['items']
+        examples = list_examples()['items'][:3]
         self.assertEqual([e['observed_quote_asset'] for e in examples], ['EWYB', 'FXIon', 'BABAB'])
         self.assertEqual([e['observed_token_label'] for e in examples], ['김치', '萌兰', '黑柴'])
         self.assertEqual(len({e['token_address'] for e in examples}), 3)
+
+    def test_community_term_does_not_invent_a_chinese_translation(self):
+        result = suggest_token('the best part of binance is the binancians')
+        self.assertEqual(result['source_alias'], 'binancians')
+        self.assertEqual(result['pattern'], 'Community term')
+        self.assertIsNone(result['name'])
+        self.assertFalse(result['launch_eligible'])
