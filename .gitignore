@@ -1,0 +1,25 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+!.env.*.example
+data/
+*.enc.json
+watch-wallets.json
+encoded*.txt
+*.pem
+*.key
+*.db
+*.sqlite*
+venv/
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+*.log
+work/
+# Local wallet diagnostics must never be published.
+detect-format.mjs
+verify-keys.mjs
+test-cryptojs.mjs

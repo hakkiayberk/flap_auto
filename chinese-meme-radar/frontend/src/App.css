@@ -1,0 +1,8 @@
+/* App.css — intentionally empty; all styles live in index.css */
+
+.connection-panel { padding: 20px; margin-bottom: 24px; border: 1px solid #334155; border-radius: 16px; background: #121826; color: #dbeafe; }
+.connection-panel h3 { margin: 0 0 10px; }
+.connection-panel p, .connection-panel span { color: #94a3b8; }
+.connection-panel div { margin-top: 10px; }
+.trend-context { font-size: 13px; color: #94a3b8; margin: 10px 0 5px; }
+.trend-context-note { color: #94a3b8; font-size: 11px; }

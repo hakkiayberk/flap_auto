@@ -1,0 +1,15 @@
+{
+  "mode": "preparation",
+  "buyTaxBps": 200,
+  "sellTaxBps": 200,
+  "taxDistribution": null,
+  "beneficiary": null,
+  "taxDurationSeconds": null,
+  "antiFarmerDurationSeconds": null,
+  "buyWalletCount": 10,
+  "buyAmountBnbPerWallet": null,
+  "maxDailyBnb": null,
+  "maxLaunchesPerDay": null,
+  "postLanguage": "zh",
+  "interfaceLanguage": "en"
+}
