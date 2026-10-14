@@ -51,6 +51,8 @@ export default function LaunchStudio({selection}: {selection: LaunchSelection | 
     if (key === 'name' && draft.logo_asset === 'concept:black-shiba' && value !== '黑柴') { setLogoUrl(''); setBrief('') }
     setDraft(previous=>({...previous,[key]:value,...(key === 'name' && previous.logo_asset === 'concept:black-shiba' && value !== '黑柴' ? {logo_asset:'', metadata_cid:''} : {}),...(['first_post_url','creator_address','logo_asset','description'].includes(key) ? {metadata_cid:''} : {})}))
     setTransaction(null)
+    setMissing([])
+    setMessage('Draft changed. Validate again before preparing deployment.')
     if (key === 'tweet_text') setPostLength(null)
   }
   async function act(operation:()=>Promise<void>) {

@@ -104,6 +104,7 @@ export default function App() {
       if (!res.ok) throw new Error('Trend request failed')
       const data = await res.json()
       setTrends(data.items ?? [])
+      setStatus('Connected')
       setLastUpdated(new Date())
     } catch { setStatus('Disconnected') }
     finally { setLoading(false) }
