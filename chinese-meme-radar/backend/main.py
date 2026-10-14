@@ -7,6 +7,7 @@ from api.trends import router as trends_router
 from api.animals import router as animals_router
 from api.deploy import router as deploy_router
 from api.launch import router as launch_router
+from api.examples import router as examples_router
 from jobs.scheduler import start_scheduler, stop_scheduler
 
 # Create database tables
@@ -43,6 +44,7 @@ app.include_router(trends_router)
 app.include_router(animals_router)
 app.include_router(deploy_router)
 app.include_router(launch_router)
+app.include_router(examples_router)
 
 
 @app.get("/")

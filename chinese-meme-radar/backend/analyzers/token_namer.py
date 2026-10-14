@@ -1,185 +1,50 @@
-"""
-Token name suggester — rule-based, no AI required.
-Takes a Chinese trend title and produces an English meme-coin name + ticker.
-"""
+"""Conservative Chinese name suggestions. Matching a name does not prove virality."""
 import re
-import unicodedata
-from typing import Optional
 
-# ── Mapping: Chinese keyword → English name parts ────────────────────────────
-KEYWORD_MAP: dict[str, tuple[str, str]] = {
-    # Keyword: (name_part, ticker_hint)
-    "熊猫": ("Panda", "PANDA"),
-    "大熊猫": ("Giant Panda", "GPANDA"),
-    "龙": ("Dragon", "DRAG"),
-    "凤凰": ("Phoenix", "PHNX"),
-    "老虎": ("Tiger", "TIGR"),
-    "狮子": ("Lion", "LION"),
-    "兔": ("Bunny", "BUNNY"),
-    "兔子": ("Rabbit", "RBBT"),
-    "猫": ("Cat", "CAT"),
-    "狗": ("Dog", "DOG"),
-    "狐狸": ("Fox", "FOX"),
-    "狼": ("Wolf", "WOLF"),
-    "熊": ("Bear", "BEAR"),
-    "鸭": ("Duck", "DUCK"),
-    "鸡": ("Rooster", "ROST"),
-    "鹤": ("Crane", "CRAN"),
-    "鹰": ("Eagle", "EAGL"),
-    "貂": ("Mink", "MINK"),
-    "麒麟": ("Kirin", "KIRIN"),
-    "玄武": ("BlackTortoise", "XWWU"),
-    "白虎": ("WhiteTiger", "WTGR"),
-    "朱雀": ("Vermillion Bird", "ZQRD"),
-    "青龙": ("Azure Dragon", "QDRAG"),
-    "蟾蜍": ("ToadMoon", "TOAD"),
-    "金蟾": ("GoldenToad", "GTOAD"),
-    "乌龟": ("Turtle", "TRTL"),
-    "鲤鱼": ("Koi", "KOI"),
-    "金鱼": ("Goldfish", "GOLD"),
-    "锦鲤": ("LuckyKoi", "LKOI"),
-    "冰墩墩": ("BingDwenDwen", "BNGD"),
-    "雪容融": ("ShueyRhonRhon", "SUER"),
-    "吉祥物": ("Mascot", "MAST"),
-    "萌宠": ("CutePet", "CPET"),
-    "网红动物": ("ViralPet", "VPET"),
-    "羊驼": ("Alpaca", "ALPA"),
-    "草泥马": ("AlpacaMeme", "CNMA"),
-    "神兽": ("SacredBeast", "SBST"),
-    "瑞兽": ("AuspBeast", "AUSB"),
-    "神龙": ("ShenLong", "SHLN"),
-    "表情包": ("MemeFace", "MFCE"),
-}
+# Small reviewed alias registry, not an open-ended entity recognizer.
+ENTITIES = (
+    {"name": "萌兰", "aliases": ("萌兰",), "pattern": "Named animal", "emoji": "🐼",
+     "reason": "Preserve the specific panda name rather than replacing it with a generic panda label."},
+    {"name": "黑柴", "aliases": ("黑柴", "Black Shiba"), "pattern": "Brand-post character", "emoji": "🐕",
+     "reason": "Use the character named in the source. A brand post does not imply endorsement of a token."},
+    {"name": "泡菜", "aliases": ("泡菜", "김치", "kimchi"), "pattern": "Cultural reference", "emoji": "🥬",
+     "reason": "Preserve the cultural reference and record its original-language alias separately."},
+)
 
-# Modifier keywords that add prefixes/suffixes
-MODIFIERS: dict[str, str] = {
-    "涨": "Moon",
-    "暴涨": "Pump",
-    "飙升": "Rocket",
-    "冲": "Boost",
-    "爆": "Blast",
-    "上天": "Sky",
-    "火了": "Viral",
-    "红了": "Hot",
-    "全国": "China",
-    "第一": "King",
-    "网红": "Star",
-    "萌": "Cute",
-    "可爱": "Kawaii",
-}
-
-# Predefined curated token suggestions for common Chinese mascots
-CURATED: dict[str, dict] = {
-    "熊猫": {
-        "name": "Panda King",
-        "ticker": "PANDAK",
-        "description": "The Chinese Giant Panda — China's most beloved national treasure. Perfect for meme coin with global recognition.",
-        "image_prompt": "Cute cartoon Chinese Giant Panda wearing a golden crown, holding BNB coin, chibi meme coin style, circular logo",
-        "logo_emoji": "🐼",
-    },
-    "龙": {
-        "name": "Golden Dragon",
-        "ticker": "DRAG",
-        "description": "The legendary Chinese Dragon — symbol of power, luck, and prosperity. Classic meme potential.",
-        "image_prompt": "Baby golden dragon chibi, holding BNB coin, orange gold gradient circular meme coin logo",
-        "logo_emoji": "🐉",
-    },
-    "锦鲤": {
-        "name": "Lucky Koi",
-        "ticker": "LKOI",
-        "description": "Koi fish = luck & wealth in Chinese culture. Weibo 'lucky koi' meme viral trend.",
-        "image_prompt": "Cute kawaii koi fish with crypto coins, red and gold circular token logo, sparkles",
-        "logo_emoji": "🐟",
-    },
-    "凤凰": {
-        "name": "PhoenixBSC",
-        "ticker": "PHNX",
-        "description": "The mythical Phoenix rises — rebirth narrative perfect for meme coins.",
-        "image_prompt": "Cute chibi phoenix bird with fire wings, golden and red circular meme token logo",
-        "logo_emoji": "🦅",
-    },
-}
+# Only produce a low-confidence review candidate for generic keyword matches.
+KEYWORDS = (
+    "大熊猫", "网红动物", "冰墩墩", "雪容融", "草泥马", "吉祥物", "表情包",
+    "熊猫", "凤凰", "老虎", "狮子", "兔子", "狐狸", "麒麟", "玄武", "白虎",
+    "朱雀", "青龙", "蟾蜍", "金蟾", "乌龟", "鲤鱼", "金鱼", "锦鲤", "萌宠",
+    "羊驼", "神兽", "瑞兽", "神龙", "兔", "猫", "狗", "狼", "熊", "鸭", "鸡", "鹤", "鹰", "貂", "龙",
+)
 
 
 def suggest_token(title: str) -> dict:
-    """
-    Given a Chinese trend title, return a token name suggestion dict.
-    """
-    # Check curated first
-    for kw, curated in CURATED.items():
-        if kw in title:
-            return {**curated, "source_title": title, "confidence": "high"}
-
-    # Find the best matching animal keyword
-    matched_kw: Optional[str] = None
-    matched_info: Optional[tuple[str, str]] = None
-    for kw, info in KEYWORD_MAP.items():
-        if kw in title:
-            matched_kw = kw
-            matched_info = info
-            break
-
-    if not matched_info:
-        # Fallback: transliterate/simplify
-        slug = _simplify_title(title)
-        return {
-            "name": slug,
-            "ticker": slug[:5].upper(),
-            "description": f"Trending Chinese meme: {title}",
-            "image_prompt": f"Cute cartoon meme coin logo for '{title}', chibi style, circular badge",
-            "logo_emoji": "🌟",
-            "source_title": title,
-            "confidence": "low",
-        }
-
-    name_part, ticker_base = matched_info
-
-    # Look for modifiers
-    prefix = ""
-    for mod_kw, mod_word in MODIFIERS.items():
-        if mod_kw in title:
-            prefix = mod_word + " "
-            break
-
-    final_name = f"{prefix}{name_part}".strip()
-    # Ticker: modifier first letter + base, max 6 chars
-    if prefix:
-        ticker = (prefix[0].upper() + ticker_base)[:6]
-    else:
-        ticker = ticker_base
-
-    return {
-        "name": final_name,
-        "ticker": ticker,
-        "description": (
-            f"Based on trending Chinese topic: {title}. "
-            f"'{matched_kw}' is a beloved Chinese cultural symbol with strong meme potential."
-        ),
-        "image_prompt": (
-            f"Cute cartoon {name_part} mascot, chibi anime style, "
-            f"crypto coin meme logo, circular badge, vibrant colors, white background"
-        ),
-        "logo_emoji": _pick_emoji(matched_kw or ""),
-        "source_title": title,
-        "confidence": "medium",
-    }
-
-
-def _pick_emoji(kw: str) -> str:
-    emoji_map = {
-        "熊猫": "🐼", "大熊猫": "🐼", "龙": "🐉", "凤凰": "🦅",
-        "老虎": "🐯", "狮子": "🦁", "兔": "🐰", "兔子": "🐰",
-        "猫": "🐱", "狗": "🐶", "狐狸": "🦊", "狼": "🐺",
-        "熊": "🐻", "鸭": "🦆", "鸡": "🐓", "鹤": "🦩",
-        "鹰": "🦅", "麒麟": "🦄", "鲤鱼": "🐟", "锦鲤": "🐠",
-        "金蟾": "🐸", "蟾蜍": "🐸", "乌龟": "🐢",
-    }
-    return emoji_map.get(kw, "🌟")
-
-
-def _simplify_title(title: str) -> str:
-    """Create a simple English-like slug from Chinese title."""
-    # Remove non-alphanumeric, keep letters
-    ascii_part = unicodedata.normalize("NFKD", title).encode("ascii", "ignore").decode()
-    cleaned = re.sub(r"[^a-zA-Z0-9]", "", ascii_part)
-    return cleaned[:8].capitalize() or "ChinaMeme"
+    base = {"source_title": title, "virality_verified": False, "launch_eligible": False,
+            "review_required": True, "description": "", "image_prompt": ""}
+    matches = []
+    for entity in ENTITIES:
+        for alias in entity["aliases"]:
+            # Latin aliases must be complete phrases, not substrings in unrelated words.
+            matched = (re.search(r"(?<!\w)" + re.escape(alias) + r"(?!\w)", title, re.IGNORECASE)
+                       if alias.isascii() else alias in title)
+            if matched:
+                matches.append((entity, alias))
+                break
+    if len(matches) > 1:
+        return {**base, "name": None, "ticker": None, "confidence": "none", "pattern": "Ambiguous entities",
+                "reason": "Multiple reviewed entities occur in this title. Select the intended subject before naming.",
+                "candidates": [entity["name"] for entity, _ in matches], "logo_emoji": "🔎"}
+    if matches:
+        entity, alias = matches[0]
+        return {**base, "name": entity["name"], "ticker": entity["name"], "source_alias": alias,
+                "confidence": "medium", "pattern": entity["pattern"], "reason": entity["reason"],
+                "logo_emoji": entity["emoji"]}
+    keyword = next((word for word in sorted(KEYWORDS, key=len, reverse=True) if word in title), None)
+    if keyword:
+        return {**base, "name": keyword, "ticker": keyword, "source_alias": keyword,
+                "confidence": "low", "pattern": "Keyword hypothesis", "logo_emoji": "🔎",
+                "reason": "A broad keyword was matched. Confirm the actual character, image and context before naming."}
+    return {**base, "name": None, "ticker": None, "confidence": "none", "pattern": "No verified entity",
+            "reason": "No reviewed entity was extracted. Do not invent a generic token name for this title.", "logo_emoji": "🔎"}

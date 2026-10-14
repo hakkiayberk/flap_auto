@@ -17,6 +17,21 @@ interface Trend {
   growth_indicator: number
   is_analyzed: boolean
   context: { summary: string; analysis_status: string; score_note: string }
+  suggestion?: { name: string | null; reason: string; confidence: string }
+}
+
+interface ReferenceExample {
+  id: string
+  source_entity: string
+  observed_token_label: string
+  chinese_candidate_name: string
+  pattern: string
+  explanation: string
+  naming_rule: string
+  observed_quote_asset: string
+  source_post_url: string
+  token_url: string
+  timing_note: string
 }
 
 interface Stats {
@@ -59,6 +74,7 @@ export default function App() {
   const [platform, setPlatform] = useState<string>('')
   const [loading, setLoading] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
+  const [examples, setExamples] = useState<ReferenceExample[]>([])
   const [connections, setConnections] = useState<{ checks: { name: string; ready: boolean; detail: string }[] } | null>(null)
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
 
@@ -95,6 +111,7 @@ export default function App() {
   }
 
   useEffect(() => {
+    fetch('/api/examples').then(r => r.ok ? r.json() : null).then(d => setExamples(d?.items ?? [])).catch(() => setExamples([]))
     fetch('/api/launch/status').then(r => r.ok ? r.json() : null).then(setConnections).catch(() => setConnections(null))
     fetch('/api/health')
       .then(r => r.json())
@@ -203,6 +220,28 @@ export default function App() {
             ))}
           </div>
 
+          {examples.length > 0 && (
+            <section className="reference-section">
+              <h3>Reference Patterns</h3>
+              <p className="reference-note">Naming examples only · Our first release uses BNB pools · Source popularity does not prove token demand</p>
+              <div className="reference-grid">
+                {examples.map(e => (
+                  <article className="reference-card" key={e.id}>
+                    <span className="category-tag">{e.pattern}</span>
+                    <h4>{e.source_entity} → {e.observed_token_label}</h4>
+                    <p>{e.explanation}</p>
+                    <p className="reference-rule">{e.naming_rule}</p>
+                    <small>{e.timing_note}</small>
+                    <div className="reference-links">
+                      <a href={e.source_post_url} target="_blank" rel="noopener noreferrer">Source post ↗</a>
+                      <a href={e.token_url} target="_blank" rel="noopener noreferrer">Reference token ↗</a>
+                    </div>
+                    <small>Reference quote: {e.observed_quote_asset} · Candidate name: <span lang="zh">{e.chinese_candidate_name}</span></small>
+                  </article>
+                ))}
+              </div>
+            </section>
+          )}
           {/* Feed */}
           <section className="feed-section">
             <div className="section-header">
@@ -244,7 +283,8 @@ export default function App() {
                         )}
                       </div>
                       <div className="trend-title" lang="zh">{t.title}</div>
-                      <p className="trend-context">{t.context?.summary}</p>
+                      <p className="trend-context">{t.suggestion?.name ? <>Name candidate: <span lang="zh">{t.suggestion.name}</span> · Review required</> : 'No reviewed name candidate'}</p>
+                      <p className="trend-context">{t.suggestion?.reason ?? t.context?.summary}</p>
                       <small className="trend-context-note">{t.context?.score_note}</small>
                       <div className="trend-footer">
                         <div className="trend-stats">

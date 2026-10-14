@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, desc
 from database.session import SessionLocal
 from database.models import Trend
+from analyzers.token_namer import suggest_token
 
 router = APIRouter(prefix="/api/trends", tags=["trends"])
 
@@ -67,6 +68,7 @@ def _trend_to_dict(t: Trend) -> dict:
     return {
         "id": t.id,
         "title": t.title,
+        "suggestion": suggest_token(t.title),
         "original_url": t.original_url,
         "source_platform": t.source_platform,
         "published_at": t.published_at.isoformat() if t.published_at else None,

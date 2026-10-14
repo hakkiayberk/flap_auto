@@ -11,5 +11,7 @@
   "maxDailyBnb": null,
   "maxLaunchesPerDay": null,
   "postLanguage": "zh",
-  "interfaceLanguage": "en"
+  "interfaceLanguage": "en",
+  "quoteToken": "0x0000000000000000000000000000000000000000",
+  "quoteAsset": "BNB"
 }

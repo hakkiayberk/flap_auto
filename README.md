@@ -69,3 +69,11 @@ Use `git pull --ff-only` before work and push reviewed source changes. GitHub ho
 - [X counting characters](https://docs.x.com/fundamentals/counting-characters)
 - [Flap launch reference](https://github.com/flap-sh/flap-skills/tree/main/launch-bnb-token-on-flap)
 - [Flap Portal interface](https://github.com/flap-sh/FlapVaultExample/blob/main/src/flap/IPortal.sol)
+
+## Reviewed naming references
+
+The three supplied post/token pairs are stored in `chinese-meme-radar/backend/reference/examples.json` and displayed through `/api/examples`. They demonstrate a cultural entity (泡菜 / 김치), a named panda (萌兰), and a character extracted from a brand post (Black Shiba / 黑柴). These are observations, not verified causal links or profitability evidence. The first reference uses an older source post. Exact post-to-deployment latency is not established.
+
+Chinese candidates preserve specific entities. English controls and explanations remain separate. Unknown subjects receive no invented fallback name; broad keyword matches require review, and ambiguous titles have no single candidate. The reviewed alias registry is small; generalized entity extraction and live X ingestion remain outstanding.
+
+The reference pools display EWYB, FXIon and BABAB. The user selected native BNB for the first release; do not automatically copy reference pool assets. The first-post URL must be saved and verified in metadata, and brand source posts must never be represented as company endorsement of a token.

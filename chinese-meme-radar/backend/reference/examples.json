@@ -1,0 +1,53 @@
+[
+  {
+    "id": "kimchi",
+    "source_post_url": "https://x.com/chinh132hn/status/2096860516337746277",
+    "token_url": "https://gmgn.ai/bsc/token/0xe829c8f202fa25a98b33ea75bd2fbd1b0a577777",
+    "token_address": "0xe829c8f202fa25a98b33ea75bd2fbd1b0a577777",
+    "source_entity": "泡菜",
+    "observed_token_label": "김치",
+    "chinese_candidate_name": "泡菜",
+    "pattern": "Cultural reference",
+    "explanation": "The post connects kimchi with a basket of South Korean stocks. The token keeps the Korean cultural name; the Chinese candidate remains 泡菜.",
+    "naming_rule": "Keep the cultural entity and its original spelling; record translated aliases separately.",
+    "observed_quote_asset": "EWYB",
+    "source_post_date": "2026-09-07",
+    "observed_token_created_label": "10/14/2026 16:59:13",
+    "timing_note": "This source post is older than the token creation label. Do not assume every reference is a fresh viral post.",
+    "verification": "Post and token-page content observed in browser; chain metadata and causality not independently verified."
+  },
+  {
+    "id": "menglan",
+    "source_post_url": "https://x.com/Gap2026_Dev/status/2101815180661502314",
+    "token_url": "https://gmgn.ai/bsc/token/0xbd523d30e1b7ac5f53e1e37f36aa2ef782f97777",
+    "token_address": "0xbd523d30e1b7ac5f53e1e37f36aa2ef782f97777",
+    "source_entity": "萌兰",
+    "observed_token_label": "萌兰",
+    "chinese_candidate_name": "萌兰",
+    "pattern": "Named animal",
+    "explanation": "The post names the panda Menglan and links to a Weibo topic about its keeper carrying it home. The specific panda name is the recognisable hook.",
+    "naming_rule": "Use the named character before the broad animal category; 萌兰 is more specific than 熊猫.",
+    "observed_quote_asset": "FXIon",
+    "source_post_date": "2026-09-21",
+    "observed_token_created_label": "09/21/2026 02:26:15",
+    "timing_note": "The post and token labels show the same date. Exact time delay needs timezone and chain verification.",
+    "verification": "Post and token-page content observed in browser; chain metadata and causality not independently verified."
+  },
+  {
+    "id": "black-shiba",
+    "source_post_url": "https://x.com/alibaba_cloud/status/2110216195865461231",
+    "token_url": "https://gmgn.ai/bsc/token/0x0b03a279bc9aac33eb87cfc2f8e68fa77f2b7777",
+    "token_address": "0x0b03a279bc9aac33eb87cfc2f8e68fa77f2b7777",
+    "source_entity": "Black Shiba",
+    "observed_token_label": "黑柴",
+    "chinese_candidate_name": "黑柴",
+    "pattern": "Brand-post character",
+    "explanation": "Alibaba Cloud's post presents a Black Shiba with playful product language. The token condenses that character into the Chinese name 黑柴. The post does not establish company endorsement of the token.",
+    "naming_rule": "Extract the character from the brand post; do not name the token after the company or imply endorsement.",
+    "observed_quote_asset": "BABAB",
+    "source_post_date": "2026-10-14",
+    "observed_token_created_label": "10/14/2026 06:51:24",
+    "timing_note": "The post and token labels show the same date. Exact time delay needs timezone and chain verification.",
+    "verification": "Post and token-page content observed in browser; chain metadata and causality not independently verified."
+  }
+]

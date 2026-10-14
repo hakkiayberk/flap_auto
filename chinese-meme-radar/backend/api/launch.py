@@ -24,6 +24,8 @@ def readiness():
         pass
     checks.append({"name": "10 buy wallets", "ready": count == 10,
                    "detail": f"{count} unique watch addresses found. Signing access and balances are not verified."})
+    checks.append({"name": "Quote asset", "ready": True,
+                   "detail": "BNB selected for the first release. ERC-20 quote pools remain unsupported."})
     checks.append({"name": "Tax configuration", "ready": False,
                    "detail": "Buy 2% / sell 2%. Dividend or recipient allocation, durations and budget are still pending."})
     checks.append({"name": "Execution", "ready": False,
